@@ -1,0 +1,71 @@
+-- Check if AutoMenu is enabled
+if getgenv().AutoMenu then    
+    -- Step 1: Execute various server calls
+    local args = {
+        [1] = {
+            [1] = {
+                [1] = "\1"
+            },
+            [2] = "2"
+        }
+    }
+    
+    game:GetService("ReplicatedStorage").dataRemoteEvent:FireServer(unpack(args))
+    wait(1.5)
+    
+    local args = {
+        [1] = {
+            [1] = "ui",
+            [2] = "LeaderboardGui"
+        }
+    }
+    
+    game:GetService("ReplicatedStorage").Utility.AssetRequester.Remote:InvokeServer(unpack(args))
+    
+    local args = {
+        [1] = "GetWeapons"
+    }
+    
+    game:GetService("ReplicatedStorage").remotes.getData:InvokeServer(unpack(args))
+    game:GetService("ReplicatedStorage").remotes.reloadInvy:InvokeServer()
+    
+    local args = {
+        [1] = "Desert Temple"
+    }
+    
+    game:GetService("ReplicatedStorage").remotes.getDungeonStats:InvokeServer(unpack(args))
+    
+    local args = {
+        [1] = {
+            [1] = {
+                [1] = "\1",
+                [2] = {
+                    ["\3"] = "select",
+                    ["characterIndex"] = 1
+                }
+            },
+            [2] = "L"
+        }
+    }
+    
+    game:GetService("ReplicatedStorage").dataRemoteEvent:FireServer(unpack(args))   
+    
+    wait(0.9)
+    
+    -- Step 2: Load and run the external script
+    print("Executing The Script...")
+    
+    local version = os.time()  -- Prevent caching
+    local success, err = pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/wset3/test3/refs/heads/main/3" .. version))()
+    end)
+
+    -- Step 3: Check if the loadstring was successful
+    if not success then
+        print("Error loading script: ", err)
+    else
+        print("Script loaded successfully.")
+    end
+else
+    print("Macro Succesfully Saved and Load")
+end
