@@ -1,4 +1,130 @@
--- Check if AutoMenu is enabled
+local player = game:GetService("Players").LocalPlayer
+local head = player.Character and player.Character:FindFirstChild("Head")
+
+if getgenv().AutoMakeDungeon then
+    -- Function to set up automatic dungeon creation
+    local function setupAutoDungeon(playerLevel)
+        -- Find recommended dungeon based on level
+        local dungeonName, difficulty = getRecommendedDungeon(playerLevel)
+
+        if dungeonName and difficulty then
+            -- Setup args to create the recommended party
+            local createPartyArgs = {
+                [1] = {
+                    [1] = {
+                        [1] = "\1",
+                        [2] = {
+                            ["\3"] = "CreateParty",
+                            ["partyData"] = {
+                                ["difficulty"] = difficulty,
+                                ["minimumJoinLevel"] = playerLevel,
+                                ["tier"] = 1,
+                                ["visibility"] = "Public",
+                                ["mode"] = "Normal",
+                                ["dungeonName"] = tostring(dungeonName),
+                                ["maxPlayers"] = 40
+                            }
+                        }
+                    },
+                    [2] = "5"
+                }
+            }
+
+            -- Additional server calls similar to previous AutoMenu script
+            local args1 = {
+                [1] = {
+                    [1] = {
+                        [1] = "\1"
+                    },
+                    [2] = "2"
+                }
+            }
+            game:GetService("ReplicatedStorage").dataRemoteEvent:FireServer(unpack(args1))
+            wait(1.5)
+
+            local args2 = {
+                [1] = {
+                    [1] = "ui",
+                    [2] = "LeaderboardGui"
+                }
+            }
+            game:GetService("ReplicatedStorage").Utility.AssetRequester.Remote:InvokeServer(unpack(args2))
+
+            local args3 = {
+                [1] = "GetWeapons"
+            }
+            game:GetService("ReplicatedStorage").remotes.getData:InvokeServer(unpack(args3))
+            game:GetService("ReplicatedStorage").remotes.reloadInvy:InvokeServer()
+
+            local args4 = {
+                [1] = dungeonName
+            }
+            game:GetService("ReplicatedStorage").remotes.getDungeonStats:InvokeServer(unpack(args4))
+
+            local args5 = {
+                [1] = {
+                    [1] = {
+                        [1] = "\1",
+                        [2] = {
+                            ["\3"] = "select",
+                            ["characterIndex"] = 1
+                        }
+                    },
+                    [2] = "L"
+                }
+            }
+            game:GetService("ReplicatedStorage").dataRemoteEvent:FireServer(unpack(args5))
+
+            wait(0.9)
+
+            -- Fire server event to create party
+            game:GetService("ReplicatedStorage").dataRemoteEvent:FireServer(unpack(createPartyArgs))
+
+            wait(2)
+
+            -- Fire server event to start party
+            local startPartyArgs = {
+                [1] = {
+                    [1] = {
+                        [1] = "\1",
+                        [2] = {
+                            ["\3"] = "StartParty"
+                        }
+                    },
+                    [2] = "5"
+                }
+            }
+            game:GetService("ReplicatedStorage").dataRemoteEvent:FireServer(unpack(startPartyArgs))
+
+            print("Automatic Dungeon Setup Complete: " .. dungeonName .. " (" .. difficulty .. ")")
+        else
+            print("No suitable dungeon found for current level.")
+        end
+    end
+
+    -- Existing level detection code remains the same
+    if head then
+        local playerNameplate = head:FindFirstChild("playerNameplate")
+        if playerNameplate then
+            local levelTextLabel = playerNameplate:FindFirstChild("Level")
+            if levelTextLabel then
+                local playerLevel = tonumber(levelTextLabel.Text)
+                
+                -- Call the auto dungeon setup function
+                setupAutoDungeon(playerLevel)
+            else
+                warn("Level TextLabel not found")
+            end
+        else
+            warn("playerNameplate not found")
+        end
+    else
+        warn("Head not found")
+    end
+else
+    print("AutoMakeDungeon is disabled")
+end
+
 if getgenv().AutoMenu then    
     -- Step 1: Execute various server calls
     local args = {
